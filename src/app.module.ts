@@ -10,6 +10,7 @@ import {
   DB_PORT,
   DB_USER,
 } from './commom/constants/env-variables'
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import {
       isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: 'mysql',
         host: configService.get<string>(DB_HOST),
@@ -28,7 +30,9 @@ import {
         autoLoadEntities: true,
         synchronize: true,
       }),
+      inject: [ConfigService],
     }),
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
