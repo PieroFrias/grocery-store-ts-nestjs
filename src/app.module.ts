@@ -11,6 +11,7 @@ import {
   DB_USER,
 } from './commom/constants/env-variables'
 import { CategoriesModule } from './categories/categories.module';
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { CategoriesModule } from './categories/categories.module';
       inject: [ConfigService],
     }),
     CategoriesModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

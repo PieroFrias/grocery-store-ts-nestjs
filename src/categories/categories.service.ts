@@ -3,10 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Like, Repository } from 'typeorm';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { Category } from './entities/category.entity';
-import { handleDBExceptions } from '../commom/functions/handleDBExceptions';
 import { FilterCategoryDto } from './dto/filter-category.dto';
+import { Category } from './entities/category.entity';
 import { PaginatedResponse } from '../commom/interfaces/paginated-response.interface';
+import { handleDBExceptions } from '../commom/functions/handleDBExceptions';
 
 @Injectable()
 export class CategoriesService {
@@ -48,12 +48,12 @@ export class CategoriesService {
     const { page = 1, pageSize = 10, name } = filterCategoryDto
 
     const offset = (page - 1) * pageSize
-    const whereCondition = {}
+    const where = {}
 
-    if (name) whereCondition['name'] = Like(`%${name}%`)
+    if (name) where['name'] = Like(`%${name}%`)
 
     const [data, totalItems] = await this.categoriesepository.findAndCount({
-      where: whereCondition,
+      where,
       order: { id: 'DESC' },
       skip: offset,
       take: pageSize,
@@ -95,7 +95,7 @@ export class CategoriesService {
   async remove (id: number): Promise<{ message: string }> {
     await this.findOne(id)
 
-    // await this.hasProductsAssociated(id)
+    await this.hasProductsAssociated(id)
 
     await this.categoriesepository.delete(id)
 
@@ -108,14 +108,15 @@ export class CategoriesService {
     if (category) throw new ConflictException(`Duplicate entry '${name}'`)
   }
 
-  /*private async hasProductsAssociated (id: number) {
+  private async hasProductsAssociated (id: number) {
     const categoryWithProducts = await this.categoriesepository.findOne({
-      where: {
-        id,
-      },
+      where: { id },
+      relations: ['products']
     })
 
-    if (categoryWithProducts)
+    const products = categoryWithProducts.products.length
+
+    if (products > 0)
       throw new ConflictException('This category has products associated')
-  }*/
+  }
 }
